@@ -6,7 +6,8 @@ import dayjs from "dayjs"
 const ProjectsGrid = ({ projects }: { projects: IProject[] }) => {
   const { user } = useAuth()
 
-  if (projects.length > 0)
+  if (!user || !projects.length) return null
+  else
     return (
       <div className=" grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 pt-10 md:pt-20 ">
         {projects.map((project) => (
@@ -17,15 +18,12 @@ const ProjectsGrid = ({ projects }: { projects: IProject[] }) => {
                 <button className="bi bi-chevron-down"></button>
               </div>
               <h4 className="text-gray-500">{project.description}</h4>
-              <p className="text-gray-500">
-                {dayjs(project.createdAt).format("DD/MM/YYYY")}
-              </p>
+              <p className="text-gray-500">{dayjs(project.createdAt).format("DD/MM/YYYY")}</p>
             </button>
           </Link>
         ))}
       </div>
     )
-  else return null
 }
 
 export default ProjectsGrid
