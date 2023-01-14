@@ -12,10 +12,10 @@ const ProjectsGrid = ({ projects }: { projects: IProject[] }) => {
       <div className=" grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 pt-10 md:pt-20 ">
         {projects.map((project) => (
           <Link href={`/projects/${user.uid}/${project.id}`} key={project.id}>
-            <button className=" flex flex-col gap-5 p-4 text-start items-start bg-black rounded-lg shadow-xl hover:scale-105 transition duration-200">
-              <div className="w-full flex justify-between items-center">
-                <h1 className="text-2xl">{project.name}</h1>
-                <button className="bi bi-chevron-down"></button>
+            <button className="group flex flex-col gap-5 p-7 text-start items-start bg-black rounded-lg shadow-xl border border-gray-800 hover:border-white transition duration-200">
+              <div className="w-full flex justify-between items-center text-2xl">
+                <h1 className="">{project.name}</h1>
+                <i className="invisible group-hover:visible bi bi-box-arrow-in-up-right"></i>
               </div>
               <h4 className="text-gray-500">{project.description}</h4>
               <p className="text-gray-500">{dayjs(project.createdAt).format("DD/MM/YYYY")}</p>
