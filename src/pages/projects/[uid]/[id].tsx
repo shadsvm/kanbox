@@ -7,16 +7,6 @@ import { uuidv4 as uuid } from "@firebase/util"
 import Layout from "src/layouts/layoutScreen"
 import Box from "src/components/Box"
 
-// interface IProject {
-//   name: string
-//   order: string[]
-// }
-
-// interface IColumn {
-//   name: string
-//   boxes: string[]
-// }
-
 // const mockColumns = {
 //   "7Mw5G19HTqX9vdd9KJQL": {
 //     name: "To do",

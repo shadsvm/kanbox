@@ -11,6 +11,7 @@ import { useAuth } from "src/utils/useAuth"
 const index = () => {
   const { user } = useAuth()
   const [projects, setProjects] = useState<IProject[]>([])
+  const [search, setSearch] = useState("")
 
   // const fetchProjectsOnce = async () => {
   //   if (!user) return
@@ -28,8 +29,7 @@ const index = () => {
       snapshot.forEach((doc) => {
         const data = { id: doc.id, ...doc.data() }
         setProjects((prev: IProject[]) => {
-          if (prev.find((project) => project.id === data.id))
-            return [...prev] as IProject[]
+          if (prev.find((project) => project.id === data.id)) return [...prev] as IProject[]
           else return [...prev, data] as IProject[]
         })
       })
@@ -45,8 +45,8 @@ const index = () => {
           <p>Update! checkout something!</p>
         </header>
         <main className="container mx-auto  p-5">
-          <SearchBar />
-          <ProjectsGrid projects={projects} />
+          <SearchBar search={search} setSearch={setSearch} />
+          <ProjectsGrid projects={projects} search={search} />
         </main>
       </Layout>
     </ProtectedRoute>
