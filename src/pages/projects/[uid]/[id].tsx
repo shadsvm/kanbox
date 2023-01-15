@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/router"
 import { database } from "src/utils/firebase"
-import { collection, doc, DocumentData, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore"
+import { collection, deleteDoc, doc, DocumentData, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore"
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd"
 import { uuidv4 as uuid } from "@firebase/util"
 import Layout from "src/layouts/layoutScreen"
-import BoxInput from "src/components/BoxInput"
+import Box from "src/components/Box"
 
 // interface IProject {
 //   name: string
@@ -91,6 +91,15 @@ const project = () => {
   const editBox = (id: string, name: string) => {
     setBoxes({ ...boxes, [id]: { ...boxes[id], name: name } })
     updateDoc(projectDocRef(["boxes", id]), { name: name })
+  }
+
+  const deleteBox = async (id: string) => {
+    await deleteDoc(projectDocRef(["boxes", id]))
+    setBoxes((prev) => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
   }
 
   const onDragEnd = (result: DropResult) => {
@@ -215,10 +224,9 @@ const project = () => {
                                           ref={provided.innerRef}
                                           {...provided.draggableProps}
                                           {...provided.dragHandleProps}
-                                          className={`${snapshot.isDragging ? "bg-black/80" : "bg-neutral-900"} flex justify-between items-center  rounded-xl px-5 p-3`}
+                                          className={`${snapshot.isDragging ? "bg-black/80" : "bg-neutral-900"} group flex justify-between items-center overflow-hidden rounded-xl px-5 p-3`}
                                         >
-                                          <BoxInput box={box} update={(name) => editBox(id, name)} />
-                                          <i className="bi bi-grip-vertical text-xl"></i>
+                                          <Box box={box} update={(name) => editBox(id, name)} remove={() => deleteBox(id)} />
                                         </div>
                                       )}
                                     </Draggable>
