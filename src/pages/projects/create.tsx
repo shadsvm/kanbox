@@ -15,18 +15,18 @@ const Create = () => {
 
   const router = useRouter()
   const [form, updateForm] = useReducer(
-    (prev: { [key: string]: string }, next: { [key: string]: string }) => {
+    (prev: { [key: string]: any }, next: { [key: string]: any }) => {
       const newEvent = { ...prev, ...next }
       if (newEvent.name.length > 10 || newEvent.description.length > 20) return prev
       else return newEvent
     },
-    { name: "", description: "" }
+    { name: "", description: "", public: true }
   )
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (!form.name) return
-    const project = await addDoc(collection(database, "users", user.uid, "projects"), { name: form.name, description: form.description, createdAt: dayjs().format() })
+    const project = await addDoc(collection(database, "users", user.uid, "projects"), { ...form, createdAt: dayjs().format() })
     const order = []
     for (let name of ["To do", "In Progress", "Done"]) {
       const column = await addDoc(collection(database, "users", user.uid, "projects", project.id, "columns"), { name: name, boxes: [] })
@@ -50,13 +50,21 @@ const Create = () => {
               value={form.description}
               onChange={(e) => updateForm({ description: e.target.value })}
             />
-            <div className="flex justify-end items-center gap-5 mt-5">
-              <Link href="/projects">
-                <button className="btn !px-4 !py-2 bg-black rounded">Cancel</button>
-              </Link>
-              <button type="submit" className="btn !px-4 !py-2 bg-primary-500 hover:bg-primary-600 rounded">
-                Create
+
+            <div className="w-full flex justify-between items-center gap-5 mt-5">
+              <button type="button" onClick={() => updateForm({ public: !form.public })} className="flex items-center text-lg gap-2">
+                <i className={`bi bi-${form.public ? "unlock" : "lock"}`} />
+                {form.public ? "Public" : "Private"}
               </button>
+
+              <div className="flex justify-end items-center gap-5 ">
+                <Link href="/projects">
+                  <button className="btn !px-4 !py-2 bg-black rounded">Cancel</button>
+                </Link>
+                <button type="submit" className="btn !px-4 !py-2 bg-primary-500 hover:bg-primary-600 rounded">
+                  Create
+                </button>
+              </div>
             </div>
           </form>
         </main>

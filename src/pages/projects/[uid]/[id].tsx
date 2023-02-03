@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useReducer, useState } from "react"
 import { useRouter } from "next/router"
 import { database } from "src/utils/firebase"
 import { collection, deleteDoc, doc, DocumentData, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore"
@@ -6,6 +6,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautif
 import { uuidv4 as uuid } from "@firebase/util"
 import Layout from "src/layouts/layoutScreen"
 import Box from "src/components/Box"
+import { useAuth } from "src/utils/useAuth"
 
 // const mockColumns = {
 //   "7Mw5G19HTqX9vdd9KJQL": {
@@ -44,6 +45,7 @@ interface ISnapshot {
 }
 
 const project = () => {
+  const { user } = useAuth()
   const router = useRouter()
   const { uid, id } = router.query
 
@@ -55,13 +57,7 @@ const project = () => {
   const [columns, setColumns] = useState<IColumns>({})
   const [boxes, setBoxes] = useState<IBoxes>({})
 
-  const [implementer, setImplementer] = useState<Implementer>({})
-  const updateImplementer = (column: string, value: { state?: boolean; value?: string }) => {
-    setImplementer({
-      ...implementer,
-      [column]: { ...implementer[column], ...value },
-    })
-  }
+  const [implementer, updateImplementer] = useReducer((prev: Implementer, next: any) => ({ ...prev, ...next }), {})
 
   const addBox = (column: string) => {
     const id = uuid()
@@ -75,7 +71,7 @@ const project = () => {
     })
     updateDoc(projectDocRef(["columns", column]), { boxes: columnBoxes })
     setDoc(projectDocRef(["boxes", id]), box[id])
-    updateImplementer(column, { state: false, value: "" })
+    updateImplementer({ [column]: { state: false, value: "" } })
   }
 
   const editBox = (id: string, name: string) => {
@@ -147,9 +143,10 @@ const project = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       const docSnap = await getDoc(projectDocRef())
-      if (!docSnap.exists()) return
+      if (!docSnap.exists()) return console.warn("Unable to fetch project data")
+      if (!docSnap.data().public && user?.uid !== uid) return router.push("/401")
       setOrder(docSnap.data().order)
-      // console.log('%cFetch: Remains', 'color: green', docSnap.data());
+      console.log("%cFetch: Remains", "color: green", docSnap.data())
     }
 
     const fetchColumns = async () => {
@@ -165,7 +162,7 @@ const project = () => {
       })
 
       setColumns(snapColumns as IColumns)
-      setImplementer(implementer)
+      updateImplementer(implementer)
       console.log("%cFetch: Columns", "color: green", snapColumns)
     }
 
@@ -181,10 +178,12 @@ const project = () => {
       console.log("%cFetch: Boxes", "color: green", snapBoxes)
     }
 
-    fetchOrder()
-    fetchColumns()
-    fetchBoxes()
-  }, [])
+    if (router.isReady) {
+      fetchOrder()
+      fetchColumns()
+      fetchBoxes()
+    }
+  }, [router])
 
   if (columns)
     return (
@@ -214,7 +213,7 @@ const project = () => {
                                           ref={provided.innerRef}
                                           {...provided.draggableProps}
                                           {...provided.dragHandleProps}
-                                          className={`${snapshot.isDragging ? "bg-black/80" : "bg-neutral-900"} group flex justify-between items-center overflow-hidden rounded-xl px-5 p-3`}
+                                          className={`${snapshot.isDragging ? "bg-black/80" : "bg-neutral-900"} group flex justify-between items-center overflow-hidden rounded-xl px-4 p-3`}
                                         >
                                           <Box box={box} update={(name) => editBox(id, name)} remove={() => deleteBox(id)} />
                                         </div>
@@ -228,7 +227,7 @@ const project = () => {
                           {/* Add box button */}
                           {implementer && !implementer[id].state && (
                             <button
-                              onClick={() => updateImplementer(id, { state: true })}
+                              onClick={() => updateImplementer({ [id]: { state: true } })}
                               className="flex w-full justify-start items-center gap-1 hover:text-gray-100 text-gray-400 transition duration-200"
                             >
                               <p className="bi bi-plus-lg ml-2"> Add a box</p>
@@ -248,18 +247,21 @@ const project = () => {
                                 type="text"
                                 value={implementer[id].value}
                                 onChange={(event) =>
-                                  updateImplementer(id, {
-                                    value: event.target.value,
+                                  updateImplementer({
+                                    [id]: {
+                                      state: true,
+                                      value: event.target.value,
+                                    },
                                   })
                                 }
-                                className="bg-neutral-900 rounded-xl p-3"
+                                className="bg-neutral-900 rounded-xl p-3 px-4"
                                 placeholder="Enter a title for this box..."
                               />
                               <div className="flex justify-between items-center p-2">
                                 <button type="submit" className="btn  bg-primary-500/80 hover:bg-primary-500">
                                   Add box
                                 </button>
-                                <button type="button" className="bi bi-x-lg" onClick={() => updateImplementer(id, { state: false })}></button>
+                                <button type="button" className="bi bi-x-lg" onClick={() => updateImplementer({ [id]: { state: false } })}></button>
                               </div>
                             </form>
                           )}
