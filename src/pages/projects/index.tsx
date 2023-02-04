@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { collection, onSnapshot } from "firebase/firestore"
-import Layout from "src/layouts/layoutScreen"
+import Layout from "src/layouts/layoutStatic"
 import SearchBar from "src/components/SearchBar"
 import ProjectsGrid from "src/components/ProjectsGrid"
 import ProtectedRoute from "src/components/ProtectedRoute"
@@ -41,10 +41,10 @@ const index = () => {
   return (
     <ProtectedRoute>
       <Layout>
-        <header className="w-full h-10 flex justify-center items-center from-indigo-500/30 to-cyan-500/30 bg-gradient-to-r">
-          <p>Update! checkout something!</p>
+        <header className="w-full !h-10 flex justify-center items-center from-indigo-500/50 to-cyan-500/50 bg-gradient-to-r">
+          <button className="tracking-wider text-lg">New update! Lorem ipsum checkout what changed!</button>
         </header>
-        <main className="container mx-auto  p-5">
+        <main className="container mx-auto px-5 md:px-0 py-8 ">
           <SearchBar search={search} setSearch={setSearch} />
           <ProjectsGrid projects={projects} search={search} />
         </main>

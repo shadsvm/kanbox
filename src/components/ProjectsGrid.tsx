@@ -9,7 +9,7 @@ const ProjectsGrid = ({ projects, search }: { projects: IProject[]; search: stri
   if (!user || !projects.length) return null
   else
     return (
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 pt-10 md:pt-20 ">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 pt-10 md:pt-18 ">
         {projects
           .filter((project) => project.name.toLowerCase().includes(search.toLowerCase()))
           .map((project) => (

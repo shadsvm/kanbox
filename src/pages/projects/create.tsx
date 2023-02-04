@@ -2,7 +2,7 @@ import Link from "next/link"
 import Layout from "src/layouts/layoutScreen"
 
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore"
-import { Dispatch, FormEvent, SetStateAction, useReducer, useState } from "react"
+import { FormEvent, useReducer } from "react"
 import { database } from "src/utils/firebase"
 import { useAuth } from "src/utils/useAuth"
 import { useRouter } from "next/router"
