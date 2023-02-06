@@ -2,15 +2,15 @@ import { useEffect, useState } from "react"
 import { collection, onSnapshot } from "firebase/firestore"
 import Layout from "src/layouts/layoutStatic"
 import SearchBar from "src/components/SearchBar"
-import ProjectsGrid from "src/components/ProjectsGrid"
+import BoardGrid from "src/components/BoardGrid"
 import ProtectedRoute from "src/components/ProtectedRoute"
-import type { IProject } from "src/utils/types"
+import type { Board } from "src/utils/types"
 import { database } from "src/utils/firebase"
 import { useAuth } from "src/utils/useAuth"
 
 const index = () => {
   const { user } = useAuth()
-  const [projects, setProjects] = useState<IProject[]>([])
+  const [boards, setBoards] = useState<Board[]>([])
   const [search, setSearch] = useState("")
 
   // const fetchProjectsOnce = async () => {
@@ -24,13 +24,13 @@ const index = () => {
 
   useEffect(() => {
     if (!user) return
-    const userCollection = collection(database, "users", user.uid, "projects")
+    const userCollection = collection(database, "users", user.uid, "boards")
     const unsub = onSnapshot(userCollection, (snapshot) => {
       snapshot.forEach((doc) => {
         const data = { id: doc.id, ...doc.data() }
-        setProjects((prev: IProject[]) => {
-          if (prev.find((project) => project.id === data.id)) return [...prev] as IProject[]
-          else return [...prev, data] as IProject[]
+        setBoards((prev: Board[]) => {
+          if (prev.find((board) => board.id === data.id)) return [...prev] as Board[]
+          else return [...prev, data] as Board[]
         })
       })
     })
@@ -41,12 +41,12 @@ const index = () => {
   return (
     <ProtectedRoute>
       <Layout>
-        <header className="w-full !h-10 flex justify-center items-center from-indigo-500/50 to-cyan-500/50 bg-gradient-to-r">
-          <button className="tracking-wider text-lg">New update! Lorem ipsum checkout what changed!</button>
+        <header className="flex !h-10 w-full items-center justify-center bg-gradient-to-r from-indigo-500/50 to-cyan-500/50">
+          <button className="text-lg tracking-wider">New update! Checkout what changed!</button>
         </header>
-        <main className="container mx-auto px-5 md:px-0 py-8 ">
+        <main className="container mx-auto px-5 py-8 md:px-0 ">
           <SearchBar search={search} setSearch={setSearch} />
-          <ProjectsGrid projects={projects} search={search} />
+          <BoardGrid boards={boards} search={search} />
         </main>
       </Layout>
     </ProtectedRoute>

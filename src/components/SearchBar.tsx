@@ -12,7 +12,7 @@ const SearchBar = ({search, setSearch}: {search: string, setSearch: (text:string
         onChange={e => setSearch(e.target.value)}
         maxLength={10}
       ></input>
-      <Link href="/projects/create">
+      <Link href="/board/create">
         <button className="px-4 py-2 whitespace-nowrap rounded bg-gray-300 text-black">
           Add new...
         </button>

@@ -27,18 +27,18 @@ const register = () => {
     setLoading(false)
   }
 
-  if (user) router.push("/projects")
+  if (user) router.push("/board")
   else
     return (
       <Layout>
         <main className={styles.pattern}>
-          <form onSubmit={submit} className="w-full max-w-sm flex flex-col gap-4 bg-black p-8 rounded-xl">
-            <header className="text-5xl text-center my-5">
+          <form onSubmit={submit} className="flex w-full max-w-sm flex-col gap-4 rounded-xl bg-black p-8">
+            <header className="my-5 text-center text-5xl">
               Kan<span className="text-primary-500">Box</span>
             </header>
             <input
               type="name"
-              className="bg-neutral-800 px-4 py-1 text-lg rounded"
+              className="rounded bg-neutral-800 px-4 py-1 text-lg"
               value={credentials.name}
               onChange={(event) => updateCredentials({ name: event.target.value })}
               placeholder="Name"
@@ -47,7 +47,7 @@ const register = () => {
             />
             <input
               type="email"
-              className="bg-neutral-800 px-4 py-1 text-lg rounded"
+              className="rounded bg-neutral-800 px-4 py-1 text-lg"
               value={credentials.email}
               onChange={(event) => updateCredentials({ email: event.target.value })}
               placeholder="Email"
@@ -55,7 +55,7 @@ const register = () => {
             />
             <input
               type="password"
-              className="bg-neutral-800 px-4 py-1 text-lg rounded"
+              className="rounded bg-neutral-800 px-4 py-1 text-lg"
               value={credentials.password}
               onChange={(event) => updateCredentials({ password: event.target.value })}
               placeholder="Password"
@@ -63,14 +63,14 @@ const register = () => {
             />
             <button
               type="submit"
-              className="bg-primary-500 disabled:bg-primary-300/50 rounded text-lg btn !py-2 flex justify-center items-center"
+              className="btn flex items-center justify-center rounded bg-primary-500 !py-2 text-lg disabled:bg-primary-300/50"
               disabled={loading || !credentials.name.length || !credentials.email.length || !credentials.password.length}
             >
               {!loading ? "Submit" : <p className="bi bi-arrow-clockwise"></p>}
             </button>
 
             <Link href={"/login"}>
-              <button className="text-neutral-400 mt-2">I already have an account</button>
+              <button className="mt-2 text-neutral-400">I already have an account</button>
             </Link>
           </form>
         </main>
