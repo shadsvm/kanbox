@@ -2,11 +2,13 @@ import Link from "next/link"
 import { useState } from "react"
 import useBoardStore from "src/utils/store"
 import { useAuth } from "src/utils/useAuth"
+import BoardSettings from "../Modals/BoardSettings"
 
 const Navbar = () => {
-  const [menu, setMenu] = useState(false)
-  const { user, signOut } = useAuth()
   const board = useBoardStore((state) => state.board)
+  const { user, signOut } = useAuth()
+  const [menu, setMenu] = useState(false)
+  const [settings, setSettings] = useState(false)
 
   if (board)
     return (
@@ -25,13 +27,13 @@ const Navbar = () => {
             </div>
           </section>
 
-          <button onClick={() => setMenu(!menu)} className="bi bi-gear relative text-2xl">
+          <BoardSettings state={settings} setState={setSettings} />
+
+          <div onClick={() => setMenu(!menu)} className="bi bi-gear relative cursor-pointer text-2xl">
             {menu && (
               <menu className="absolute top-8 right-0 flex flex-col items-start gap-1 whitespace-nowrap rounded-b-lg bg-black p-3 text-base">
-                <button className="bi bi-pen menuBtn">Change name</button>
-                <button className="bi bi-lock menuBtn">
-                  Make it
-                  {board.public ? " public" : " private"}
+                <button onClick={() => setSettings(true)} className="bi bi-pen menuBtn" type="button">
+                  Board settings
                 </button>
                 <button className="bi bi-trash3 menuBtn hover:text-red-400">Delete this board</button>
                 <div className="w-full border border-gray-700"></div>
@@ -40,7 +42,7 @@ const Navbar = () => {
                 </button>
               </menu>
             )}
-          </button>
+          </div>
         </nav>
       </div>
     )

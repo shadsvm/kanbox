@@ -24,6 +24,8 @@ interface Store {
   editBox: (id: string, name: string) => void
   deleteBox: (id: string) => void
 
+  updateBoard: (payload: any) => void
+
   fetchBoard: (boardUserUid: string, userUid: string) => void
   fetchBoxes: () => void
   fetchColumns: () => void
@@ -78,6 +80,11 @@ const useBoardStore = create<Store>((set, get) => ({
     })
   },
 
+  updateBoard: async (payload: any) => {
+    await updateDoc(get().boardDocRef(), payload)
+    set({ board: payload })
+  },
+
   fetchBoard: async (boardUserUid: string, userUid: string) => {
     const docSnap = await getDoc(get().boardDocRef())
 
@@ -85,7 +92,7 @@ const useBoardStore = create<Store>((set, get) => ({
     if (!docSnap.data().public && userUid !== boardUserUid) return set({ status: 401 })
 
     set({ order: docSnap.data().order, board: docSnap.data() as Board, status: 200 })
-    console.log("%cFetch: Remains", "color: green", docSnap.data())
+    console.log("%cFetch: Board", "color: green", docSnap.data())
   },
 
   fetchColumns: async () => {

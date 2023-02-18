@@ -73,10 +73,10 @@ const board = () => {
   }, [router])
 
   useEffect(() => {
-    if (![200, 0].includes(board.status)) router.push("/" + board.status)
+    if (board.status > 200) router.push("/" + board.status)
   }, [board.status])
 
-  if (board.columns && board.order.length && board.boxes)
+  if (board.status === 200)
     return (
       <main className="flex  flex-col ">
         <Navbar />
