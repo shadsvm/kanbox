@@ -2,7 +2,7 @@ import { Dispatch, FormEvent, SetStateAction, useReducer } from "react"
 import useBoardStore from "src/utils/store"
 import Modal from "./Modal"
 
-const BoardSettings = ({ state, setState }: { state: boolean; setState: Dispatch<SetStateAction<boolean>> }) => {
+const BoardSettings = ({ state, setState }: { state: string; setState: Dispatch<SetStateAction<string>> }) => {
   const board = useBoardStore((state) => state.board)
   const updateBoard = useBoardStore((state) => state.updateBoard)
 
@@ -12,17 +12,17 @@ const BoardSettings = ({ state, setState }: { state: boolean; setState: Dispatch
     event.preventDefault()
     console.log(draft)
     updateBoard(draft)
-    setState(false)
+    setState("")
   }
 
-  if (!state || !draft) return null
+  if (state !== "settings" || !draft) return null
   else
     return (
       <Modal>
-        <div className="w-full max-w-lg rounded-lg bg-black px-8 py-4 ">
+        <div className="w-full max-w-md rounded-lg bg-black px-8 py-4 md:max-w-lg ">
           <header className="mb-5 flex w-full items-center justify-between">
             <p className="text-xl font-medium">Board Settings</p>
-            <button onClick={() => setState(false)} className="bi bi-x-lg" />
+            <button onClick={() => setState("")} className="bi bi-x-lg" />
           </header>
 
           <form onSubmit={saveChanges} className="flex flex-col gap-5 p-3">
@@ -59,7 +59,7 @@ const BoardSettings = ({ state, setState }: { state: boolean; setState: Dispatch
             </button>
 
             <div className="flex w-full items-center justify-end gap-3">
-              <button onClick={() => setState(false)} type="button" className="btn bg-gray-700 hover:bg-gray-600">
+              <button onClick={() => setState("")} type="button" className="btn bg-gray-700 hover:bg-gray-600">
                 Cancel
               </button>
               <button type="submit" className="btn bg-primary-500 hover:bg-primary-600">

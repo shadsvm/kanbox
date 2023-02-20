@@ -3,12 +3,14 @@ import { useState } from "react"
 import useBoardStore from "src/utils/store"
 import { useAuth } from "src/utils/useAuth"
 import BoardSettings from "../Modals/BoardSettings"
+import BoardDeletion from "../Modals/BoardDeletion"
 
 const Navbar = () => {
   const board = useBoardStore((state) => state.board)
+  const ownerID = useBoardStore((state) => state.ownerID)
   const { user, signOut } = useAuth()
   const [menu, setMenu] = useState(false)
-  const [settings, setSettings] = useState(false)
+  const [modals, setModals] = useState("")
 
   if (board)
     return (
@@ -27,22 +29,27 @@ const Navbar = () => {
             </div>
           </section>
 
-          <BoardSettings state={settings} setState={setSettings} />
+          <BoardSettings state={modals} setState={setModals} />
+          <BoardDeletion state={modals} setState={setModals} />
 
-          <div onClick={() => setMenu(!menu)} className="bi bi-gear relative cursor-pointer text-2xl">
-            {menu && (
-              <menu className="absolute top-8 right-0 flex flex-col items-start gap-1 whitespace-nowrap rounded-b-lg bg-black p-3 text-base">
-                <button onClick={() => setSettings(true)} className="bi bi-pen menuBtn" type="button">
-                  Board settings
-                </button>
-                <button className="bi bi-trash3 menuBtn hover:text-red-400">Delete this board</button>
-                <div className="w-full border border-gray-700"></div>
-                <button onClick={signOut} className="bi bi-box-arrow-right menuBtn">
-                  Sign Out
-                </button>
-              </menu>
-            )}
-          </div>
+          {user && (
+            <div onClick={() => setMenu(!menu)} className="bi bi-gear relative cursor-pointer text-2xl">
+              {menu && (
+                <menu className="absolute top-8 right-0 flex flex-col items-start gap-1 whitespace-nowrap rounded-b-lg bg-black p-3 text-base">
+                  <button onClick={() => setModals("settings")} className="bi bi-pen menuBtn" type="button" disabled={user.uid !== ownerID}>
+                    Board settings
+                  </button>
+                  <button onClick={() => setModals("delete")} className="bi bi-trash3 menuBtn hover:text-red-400" disabled={user.uid !== ownerID}>
+                    Delete this board
+                  </button>
+                  <div className="w-full border border-gray-700"></div>
+                  <button onClick={signOut} className="bi bi-box-arrow-right menuBtn">
+                    Sign Out
+                  </button>
+                </menu>
+              )}
+            </div>
+          )}
         </nav>
       </div>
     )

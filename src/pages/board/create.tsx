@@ -1,6 +1,5 @@
 import Link from "next/link"
 import Layout from "src/layouts/layoutScreen"
-
 import { addDoc, collection, doc, updateDoc } from "firebase/firestore"
 import { FormEvent, useReducer } from "react"
 import { database } from "src/utils/firebase"
@@ -14,14 +13,7 @@ const Create = () => {
   if (!user) return null
 
   const router = useRouter()
-  const [form, updateForm] = useReducer(
-    (prev: { [key: string]: any }, next: { [key: string]: any }) => {
-      const newEvent = { ...prev, ...next }
-      if (newEvent.name.length > 10 || newEvent.description.length > 20) return prev
-      else return newEvent
-    },
-    { name: "", description: "", public: true }
-  )
+  const [form, updateForm] = useReducer((prev: { [key: string]: any }, next: { [key: string]: any }) => ({ ...prev, ...next }), { name: "", description: "", public: true })
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
@@ -39,7 +31,7 @@ const Create = () => {
     <Layout>
       <ProtectedRoute>
         <main className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center gap-5">
-          <h1 className="text-4xl font-semibold ">Lets create new board</h1>
+          <h1 className="text-4xl font-semibold">Let's create new board</h1>
           <form onSubmit={submit} className="flex w-full max-w-xl flex-col gap-3">
             <input type="text" placeholder="Name" className="rounded bg-black px-4 py-3 text-xl" maxLength={15} value={form.name} onChange={(e) => updateForm({ name: e.target.value })} required />
             <input
@@ -54,7 +46,7 @@ const Create = () => {
             <div className="mt-5 flex w-full items-center justify-between gap-5">
               <button type="button" onClick={() => updateForm({ public: !form.public })} className="flex items-center gap-2 text-lg">
                 <i className={`bi bi-${form.public ? "unlock" : "lock"}`} />
-                {form.public ? "Public" : "Private"}
+                {form.public ? "Public" : "Only me"}
               </button>
 
               <div className="flex items-center justify-end gap-5 ">

@@ -13,10 +13,13 @@ interface Store {
   implementer: Implementer
   status: number
 
+  ownerID: string
+  boardID: string
+  userID: string | null
+
   boardDocRef: (pathSegments?: string[]) => DocumentReference
   boardCollectionRef: (pathSegments?: string[]) => Query<DocumentData>
 
-  setPath: (buid: string, bid: string) => void
   setColumns: (payload: any) => void
   updateImplementer: (payload: any) => void
 
@@ -25,11 +28,12 @@ interface Store {
   deleteBox: (id: string) => void
 
   updateBoard: (payload: any) => void
+  deleteBoard: () => void
 
-  fetchBoard: (boardUserUid: string, userUid: string) => void
+  fetchBoard: () => void
   fetchBoxes: () => void
   fetchColumns: () => void
-  initializeBoard: (buid: string, bid: string, uid: string) => void
+  initializeBoard: (ownerID: string, boardID: string, userID: string) => void
 }
 
 const useBoardStore = create<Store>((set, get) => ({
@@ -41,10 +45,13 @@ const useBoardStore = create<Store>((set, get) => ({
   implementer: {},
   status: 0,
 
+  ownerID: "",
+  boardID: "",
+  userID: null,
+
   boardDocRef: (pathSegments?: string[]) => doc(database, get().path, ...(pathSegments?.length ? pathSegments : [])),
   boardCollectionRef: (pathSegments?: string[]) => collection(database, get().path, ...(pathSegments?.length ? pathSegments : [])),
 
-  setPath: (buid: string, bid: string) => set({ path: `users/${buid}/boards/${bid}` }),
   setColumns: (payload: any) => set({ columns: payload }),
   updateImplementer: (payload: any) => set((state) => ({ implementer: { ...state.implementer, ...payload } })),
 
@@ -81,18 +88,24 @@ const useBoardStore = create<Store>((set, get) => ({
   },
 
   updateBoard: async (payload: any) => {
+    if (get()?.userID !== get().ownerID) return
     await updateDoc(get().boardDocRef(), payload)
     set({ board: payload })
   },
 
-  fetchBoard: async (boardUserUid: string, userUid: string) => {
+  deleteBoard: async () => {
+    if (get()?.userID !== get().ownerID) return
+    await deleteDoc(get().boardDocRef())
+  },
+
+  fetchBoard: async () => {
     const docSnap = await getDoc(get().boardDocRef())
 
     if (!docSnap.exists()) return set({ status: 404 })
-    if (!docSnap.data().public && userUid !== boardUserUid) return set({ status: 401 })
+    if (!docSnap.data().public && get().userID !== get().ownerID) return set({ status: 401 })
 
     set({ order: docSnap.data().order, board: docSnap.data() as Board, status: 200 })
-    console.log("%cFetch: Board", "color: green", docSnap.data())
+    // console.log("%cFetch: Board", "color: green", docSnap.data())
   },
 
   fetchColumns: async () => {
@@ -108,7 +121,7 @@ const useBoardStore = create<Store>((set, get) => ({
     })
 
     set({ columns: snapColumns as Columns, implementer })
-    console.log("%cFetch: Columns", "color: green", snapColumns)
+    // console.log("%cFetch: Columns", "color: green", snapColumns)
   },
 
   fetchBoxes: async () => {
@@ -120,13 +133,13 @@ const useBoardStore = create<Store>((set, get) => ({
     })
 
     set({ boxes: snapBoxes as Boxes })
-    console.log("%cFetch: Boxes", "color: green", snapBoxes)
+    // console.log("%cFetch: Boxes", "color: green", snapBoxes)
   },
 
-  initializeBoard: (buid: string, bid: string, uid: string) => {
-    if (!buid || !bid) return
-    get().setPath(buid, bid)
-    get().fetchBoard(buid, uid)
+  initializeBoard: (ownerID: string, boardID: string, userID: string) => {
+    if (!ownerID || !boardID) return set({ status: 404 })
+    set({ ownerID, boardID, userID, path: `users/${ownerID}/boards/${boardID}` })
+    get().fetchBoard()
     get().fetchBoxes()
     get().fetchColumns()
   },

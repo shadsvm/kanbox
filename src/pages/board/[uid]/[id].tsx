@@ -89,7 +89,7 @@ const board = () => {
                 return (
                   <Droppable droppableId={id} key={id}>
                     {(provided, snapshot) => (
-                      <div className={`${snapshot.isDraggingOver ? "bg-primary-500/10" : "bg-neutral-700/20"} flex w-full shrink-0 flex-col gap-3 rounded-xl p-3 transition duration-300 sm:w-1/3`}>
+                      <div className={`${snapshot.isDraggingOver ? "bg-primary-600/50" : "bg-neutral-700/20"} flex w-full shrink-0 flex-col gap-3 rounded-xl p-3 transition duration-300 sm:w-1/3`}>
                         <header className="ml-1 text-2xl font-semibold">{column.name}</header>
                         <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-col gap-3">
                           {/* Boxes map */}
