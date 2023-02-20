@@ -42,7 +42,9 @@ const index = () => {
     <ProtectedRoute>
       <Layout>
         <header className="flex !h-10 w-full items-center justify-center bg-gradient-to-r from-indigo-500/50 to-cyan-500/50">
-          <button className="text-lg tracking-wider">New update! Checkout what changed!</button>
+          <button className="text-lg tracking-wider">
+            New update! <span className="hidden sm:inline-block">Checkout what changed!</span>
+          </button>
         </header>
         <main className="container mx-auto px-5 py-8 md:px-0 ">
           <SearchBar search={search} setSearch={setSearch} />

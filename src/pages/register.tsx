@@ -32,7 +32,7 @@ const register = () => {
     return (
       <Layout>
         <main className={styles.pattern}>
-          <form onSubmit={submit} className="flex w-full max-w-sm flex-col gap-4 rounded-xl bg-black p-8">
+          <form onSubmit={submit} className="flex w-full max-w-xs flex-col gap-4 rounded-xl bg-black p-8 sm:max-w-sm">
             <header className="my-5 text-center text-5xl">
               Kan<span className="text-primary-500">Box</span>
             </header>
