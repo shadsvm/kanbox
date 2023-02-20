@@ -38,7 +38,7 @@ const Create = () => {
               type="text"
               placeholder="Description (optional)"
               className="rounded  bg-black px-4 py-3"
-              maxLength={20}
+              maxLength={30}
               value={form.description}
               onChange={(e) => updateForm({ description: e.target.value })}
             />

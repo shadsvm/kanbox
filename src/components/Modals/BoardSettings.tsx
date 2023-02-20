@@ -6,7 +6,7 @@ const BoardSettings = ({ state, setState }: { state: string; setState: Dispatch<
   const board = useBoardStore((state) => state.board)
   const updateBoard = useBoardStore((state) => state.updateBoard)
 
-  const [draft, setDraft] = useReducer((prev: any, next: any) => ({ ...prev, ...next }), board)
+  const [draft, setDraft] = useReducer((prev: any, next: any) => ({ ...prev, ...next }), { ...board })
 
   const saveChanges = (event: FormEvent) => {
     event.preventDefault()
@@ -30,6 +30,7 @@ const BoardSettings = ({ state, setState }: { state: string; setState: Dispatch<
               <label>Rename board</label>
               <input
                 type="text"
+                maxLength={15}
                 value={draft.name}
                 onChange={(e) => setDraft({ name: e.target.value })}
                 className="max-w-xs rounded border border-gray-700 bg-gray-900 px-4 py-1"
@@ -41,6 +42,7 @@ const BoardSettings = ({ state, setState }: { state: string; setState: Dispatch<
               <label>Description</label>
               <input
                 type="text"
+                maxLength={30}
                 value={draft.description}
                 onChange={(e) => setDraft({ description: e.target.value })}
                 className="max-w-xs rounded border border-gray-700 bg-gray-900 px-4 py-1"
