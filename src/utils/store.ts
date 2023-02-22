@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { uuidv4 as uuid } from "@firebase/util"
-import { Boxes, Columns, Board, Snapshot, Implementer } from "src/utils/types"
+import { Boxes, Columns, Board, Snapshot, Builder } from "src/utils/types"
 import { collection, DocumentReference, DocumentData, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, Query } from "firebase/firestore"
 import { database } from "src/utils/firebase"
 
@@ -10,7 +10,7 @@ interface Store {
   boxes: Boxes
   board: Board | null
   columns: Columns
-  implementer: Implementer
+  builder: Builder
   status: number
 
   ownerID: string
@@ -21,11 +21,12 @@ interface Store {
   boardCollectionRef: (pathSegments?: string[]) => Query<DocumentData>
 
   setColumns: (payload: any) => void
-  updateImplementer: (payload: any) => void
+  updateBuilder: (payload: any) => void
 
   addBox: (column: string) => void
   editBox: (id: string, name: string) => void
-  deleteBox: (id: string) => void
+  deleteBox: (columnID: string, boxID: string) => void
+  deleteAllColumnBoxes: (columnID: string) => void
 
   updateBoard: (payload: any) => void
   deleteBoard: () => void
@@ -42,7 +43,7 @@ const useBoardStore = create<Store>((set, get) => ({
   boxes: {},
   board: null,
   columns: {},
-  implementer: {},
+  builder: {},
   status: 0,
 
   ownerID: "",
@@ -53,12 +54,12 @@ const useBoardStore = create<Store>((set, get) => ({
   boardCollectionRef: (pathSegments?: string[]) => collection(database, get().path, ...(pathSegments?.length ? pathSegments : [])),
 
   setColumns: (payload: any) => set({ columns: payload }),
-  updateImplementer: (payload: any) => set((state) => ({ implementer: { ...state.implementer, ...payload } })),
+  updateBuilder: (payload: any) => set((state) => ({ builder: { ...state.builder, ...payload } })),
 
   addBox: (column: string) => {
-    if (!get().implementer[column].value) return
+    if (!get().builder[column].value) return
     const id = uuid()
-    const box = { [id]: { name: get().implementer[column].value } }
+    const box = { [id]: { name: get().builder[column].value } }
     const columnBoxes = [...get().columns[column].boxes, id]
 
     set({ boxes: { ...get().boxes, ...box } })
@@ -70,7 +71,7 @@ const useBoardStore = create<Store>((set, get) => ({
     })
     updateDoc(get().boardDocRef(["columns", column]), { boxes: columnBoxes })
     setDoc(get().boardDocRef(["boxes", id]), box[id])
-    get().updateImplementer({ [column]: { state: false, value: "" } })
+    get().updateBuilder({ [column]: { state: false, value: "" } })
   },
 
   editBox: (id: string, name: string) => {
@@ -78,13 +79,39 @@ const useBoardStore = create<Store>((set, get) => ({
     updateDoc(get().boardDocRef(["boxes", id]), { name: name })
   },
 
-  deleteBox: async (id: string) => {
-    await deleteDoc(get().boardDocRef(["boxes", id]))
-    set((state) => {
-      const boxes = { ...state.boxes }
-      delete boxes[id]
-      return { boxes }
+  deleteBox: async (columnID: string, boxID: string) => {
+    const columnBoxes = get().columns[columnID].boxes.filter((box) => box !== boxID)
+    await deleteDoc(get().boardDocRef(["boxes", boxID]))
+    await updateDoc(get().boardDocRef(["columns", columnID]), { boxes: columnBoxes })
+
+    set((state) => ({
+      columns: {
+        ...state.columns,
+        [columnID]: {
+          ...state.columns[columnID],
+          boxes: [...columnBoxes],
+        },
+      },
+    }))
+  },
+  deleteAllColumnBoxes: async (columnID: string) => {
+    const boxes = get().boxes
+    const columnBoxes = get().columns[columnID].boxes
+    await updateDoc(get().boardDocRef(["columns", columnID]), { boxes: [] })
+    columnBoxes.forEach((boxID) => {
+      deleteDoc(get().boardDocRef(["boxes", boxID]))
+      delete boxes[boxID]
     })
+    set((state) => ({
+      columns: {
+        ...state.columns,
+        [columnID]: {
+          ...state.columns[columnID],
+          boxes: [],
+        },
+      },
+      boxes,
+    }))
   },
 
   updateBoard: async (payload: any) => {
@@ -111,16 +138,16 @@ const useBoardStore = create<Store>((set, get) => ({
   fetchColumns: async () => {
     const snapshot = await getDocs(get().boardCollectionRef(["columns"]))
     const snapColumns: Snapshot = {}
-    const implementer: Implementer = {}
+    const builder: Builder = {}
 
     snapshot.forEach((column) => {
       if (column.exists()) {
         snapColumns[column.id] = column.data()
-        implementer[column.id] = { state: false, value: "" }
+        builder[column.id] = { state: false, value: "" }
       }
     })
 
-    set({ columns: snapColumns as Columns, implementer })
+    set({ columns: snapColumns as Columns, builder })
     // console.log("%cFetch: Columns", "color: green", snapColumns)
   },
 

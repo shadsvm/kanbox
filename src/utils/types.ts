@@ -1,6 +1,6 @@
 import { DocumentData } from "firebase/firestore"
 
-export interface Implementer {
+export interface Builder {
   [key: string]: {
     state: boolean
     value: string

@@ -1,21 +1,19 @@
 import { useEffect } from "react"
 import { useRouter } from "next/router"
-import { database } from "src/utils/firebase"
-import { doc, updateDoc } from "firebase/firestore"
+import { updateDoc } from "firebase/firestore"
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd"
 import Box from "src/components/Box"
 import { useAuth } from "src/utils/useAuth"
 import Navbar from "src/components/Navbar/Boards"
 import useBoardStore from "src/utils/store"
 import { Boxes } from "src/utils/types"
+import BoxBuilder from "src/components/BoxBuilder"
 
 const board = () => {
   const { user } = useAuth()
   const router = useRouter()
   const board = useBoardStore()
   const { uid, id } = router.query
-
-  const boardDocRef = (pathSegments?: string[]) => doc(database, `users/${uid}/boards/${id}`, ...(pathSegments?.length ? pathSegments : []))
 
   const onDragEnd = (result: DropResult) => {
     console.log("%cEvent: Drag and Drop", "color: yellow", result)
@@ -35,7 +33,7 @@ const board = () => {
         },
       })
 
-      updateDoc(boardDocRef(["columns", source.droppableId]), {
+      updateDoc(board.boardDocRef(["columns", source.droppableId]), {
         boxes: sourceBoxes,
       })
     } else {
@@ -56,10 +54,10 @@ const board = () => {
         },
       })
 
-      updateDoc(boardDocRef(["columns", source.droppableId]), {
+      updateDoc(board.boardDocRef(["columns", source.droppableId]), {
         boxes: sourceBoxes,
       })
-      updateDoc(boardDocRef(["columns", destination.droppableId]), {
+      updateDoc(board.boardDocRef(["columns", destination.droppableId]), {
         boxes: destinationBoxes,
       })
     }
@@ -83,14 +81,23 @@ const board = () => {
         <div className="container mx-auto flex flex-wrap items-start justify-center gap-5 p-5 py-10 sm:flex-nowrap ">
           <DragDropContext onDragEnd={(result) => onDragEnd(result)}>
             {/* Columns map */}
-            {board.order.map((id: string) => {
-              const column = board.columns[id]
+            {board.order.map((columnID: string) => {
+              const column = board.columns[columnID]
               if (column)
                 return (
-                  <Droppable droppableId={id} key={id}>
+                  <Droppable droppableId={columnID} key={columnID}>
                     {(provided, snapshot) => (
                       <div className={`${snapshot.isDraggingOver ? "bg-gray-700/70" : "bg-gray-800"} flex w-full shrink-0 flex-col gap-3 rounded-xl p-3 transition duration-300 sm:w-1/3`}>
-                        <header className="ml-1 text-2xl font-semibold">{column.name}</header>
+                        <header className="flex items-center justify-between">
+                          <h1 className="ml-1 text-2xl font-semibold">{column.name}</h1>
+                          <button
+                            onClick={() => board.deleteAllColumnBoxes(columnID)}
+                            className={`rounded border border-gray-900 bg-gray-700 px-3 py-1 hover:bg-primary-500  ${column.boxes.length > 2 ? "opacity-100" : "opacity-0"}`}
+                          >
+                            {" "}
+                            Clear all
+                          </button>
+                        </header>
                         <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-col gap-3">
                           {/* Boxes map */}
                           {column.boxes.map((id, index) => {
@@ -105,7 +112,7 @@ const board = () => {
                                       {...provided.dragHandleProps}
                                       className={`${snapshot.isDragging ? "bg-primary-900" : "bg-gray-900"} group flex items-center justify-between overflow-hidden rounded-xl p-3 px-4`}
                                     >
-                                      <Box box={box} update={(name) => board.editBox(id, name)} remove={() => board.deleteBox(id)} />
+                                      <Box box={box} update={(name) => board.editBox(id, name)} remove={() => board.deleteBox(columnID, id)} />
                                     </div>
                                   )}
                                 </Draggable>
@@ -115,48 +122,7 @@ const board = () => {
                         </div>
 
                         {/* Add box button */}
-                        {!board.implementer[id].state ? (
-                          <button onClick={() => board.updateImplementer({ [id]: { state: true } })} className="flex w-full items-center justify-start gap-1 text-gray-400  hover:text-gray-100">
-                            <p className="bi bi-plus-lg ml-2">Add a box</p>
-                          </button>
-                        ) : (
-                          <form
-                            onSubmit={(event) => {
-                              event.preventDefault()
-                              board.addBox(id)
-                            }}
-                            className="flex flex-col gap-2"
-                          >
-                            <input
-                              type="text"
-                              value={board.implementer[id].value}
-                              onChange={(event) =>
-                                board.updateImplementer({
-                                  [id]: {
-                                    state: true,
-                                    value: event.target.value,
-                                  },
-                                })
-                              }
-                              className="rounded-xl bg-neutral-900 p-3 px-4"
-                              placeholder="Enter a title for this box..."
-                            />
-                            <div className="flex items-center justify-between p-2">
-                              <button type="submit" className="btn  bg-primary-500/80 hover:bg-primary-500">
-                                Add box
-                              </button>
-                              <button
-                                type="button"
-                                className="bi bi-x-lg"
-                                onClick={() =>
-                                  board.updateImplementer({
-                                    [id]: { state: false },
-                                  })
-                                }
-                              ></button>
-                            </div>
-                          </form>
-                        )}
+                        <BoxBuilder columnID={columnID} />
                       </div>
                     )}
                   </Droppable>
