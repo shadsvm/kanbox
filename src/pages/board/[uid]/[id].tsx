@@ -1,7 +1,6 @@
 import { useEffect } from "react"
 import { useRouter } from "next/router"
-import { updateDoc } from "firebase/firestore"
-import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd"
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 import Box from "src/components/Box"
 import { useAuth } from "src/utils/useAuth"
 import Navbar from "src/components/Navbar/Boards"
@@ -14,54 +13,6 @@ const board = () => {
   const router = useRouter()
   const board = useBoardStore()
   const { uid, id } = router.query
-
-  const onDragEnd = (result: DropResult) => {
-    console.log("%cEvent: Drag and Drop", "color: yellow", result)
-
-    if (!result.destination) return
-    const { source, destination } = result
-
-    if (source.droppableId === destination.droppableId) {
-      const sourceBoxes = [...board.columns[source.droppableId].boxes]
-      sourceBoxes.splice(source.index, 1)
-      sourceBoxes.splice(destination.index, 0, result.draggableId)
-      board.setColumns({
-        ...board.columns,
-        [source.droppableId]: {
-          ...board.columns[source.droppableId],
-          boxes: sourceBoxes,
-        },
-      })
-
-      updateDoc(board.boardDocRef(["columns", source.droppableId]), {
-        boxes: sourceBoxes,
-      })
-    } else {
-      const sourceBoxes = [...board.columns[source.droppableId].boxes]
-      const destinationBoxes = [...board.columns[destination.droppableId].boxes]
-
-      sourceBoxes.splice(source.index, 1)
-      destinationBoxes.splice(destination.index, 0, result.draggableId)
-      board.setColumns({
-        ...board.columns,
-        [source.droppableId]: {
-          ...board.columns[source.droppableId],
-          boxes: sourceBoxes,
-        },
-        [destination.droppableId]: {
-          ...board.columns[destination.droppableId],
-          boxes: destinationBoxes,
-        },
-      })
-
-      updateDoc(board.boardDocRef(["columns", source.droppableId]), {
-        boxes: sourceBoxes,
-      })
-      updateDoc(board.boardDocRef(["columns", destination.droppableId]), {
-        boxes: destinationBoxes,
-      })
-    }
-  }
 
   // Fetching data (once)
   useEffect(() => {
@@ -79,7 +30,7 @@ const board = () => {
       <main className="flex  flex-col ">
         <Navbar />
         <div className="container mx-auto flex flex-wrap items-start justify-center gap-5 p-5 py-10 sm:flex-nowrap ">
-          <DragDropContext onDragEnd={(result) => onDragEnd(result)}>
+          <DragDropContext onDragEnd={board.DragAndDrop}>
             {/* Columns map */}
             {board.order.map((columnID: string) => {
               const column = board.columns[columnID]

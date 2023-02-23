@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { uuidv4 as uuid } from "@firebase/util"
 import { Boxes, Columns, Board, Snapshot, Builder } from "src/utils/types"
 import { collection, DocumentReference, DocumentData, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, Query } from "firebase/firestore"
+import { DropResult } from "react-beautiful-dnd"
 import { database } from "src/utils/firebase"
 
 interface Store {
@@ -20,7 +21,6 @@ interface Store {
   boardDocRef: (pathSegments?: string[]) => DocumentReference
   boardCollectionRef: (pathSegments?: string[]) => Query<DocumentData>
 
-  setColumns: (payload: any) => void
   updateBuilder: (payload: any) => void
 
   addBox: (column: string) => void
@@ -35,6 +35,8 @@ interface Store {
   fetchBoxes: () => void
   fetchColumns: () => void
   initializeBoard: (ownerID: string, boardID: string, userID: string) => void
+
+  DragAndDrop: (result: DropResult) => void
 }
 
 const useBoardStore = create<Store>((set, get) => ({
@@ -53,7 +55,6 @@ const useBoardStore = create<Store>((set, get) => ({
   boardDocRef: (pathSegments?: string[]) => doc(database, get().path, ...(pathSegments?.length ? pathSegments : [])),
   boardCollectionRef: (pathSegments?: string[]) => collection(database, get().path, ...(pathSegments?.length ? pathSegments : [])),
 
-  setColumns: (payload: any) => set({ columns: payload }),
   updateBuilder: (payload: any) => set((state) => ({ builder: { ...state.builder, ...payload } })),
 
   addBox: (column: string) => {
@@ -169,6 +170,60 @@ const useBoardStore = create<Store>((set, get) => ({
     get().fetchBoard()
     get().fetchBoxes()
     get().fetchColumns()
+  },
+
+  DragAndDrop: (result: DropResult) => {
+    // console.log("%cEvent: Drag and Drop", "color: yellow", result)
+    // console.time()
+
+    if (!result.destination) return
+    const { source, destination } = result
+
+    if (source.droppableId === destination.droppableId) {
+      const sourceBoxes = [...get().columns[source.droppableId].boxes]
+      sourceBoxes.splice(source.index, 1)
+      sourceBoxes.splice(destination.index, 0, result.draggableId)
+      set((state) => ({
+        columns: {
+          ...state.columns,
+          [source.droppableId]: {
+            ...state.columns[source.droppableId],
+            boxes: sourceBoxes,
+          },
+        },
+      }))
+
+      updateDoc(get().boardDocRef(["columns", source.droppableId]), {
+        boxes: sourceBoxes,
+      })
+    } else {
+      const sourceBoxes = [...get().columns[source.droppableId].boxes]
+      const destinationBoxes = [...get().columns[destination.droppableId].boxes]
+
+      sourceBoxes.splice(source.index, 1)
+      destinationBoxes.splice(destination.index, 0, result.draggableId)
+      set((state) => ({
+        columns: {
+          ...state.columns,
+          [source.droppableId]: {
+            ...state.columns[source.droppableId],
+            boxes: sourceBoxes,
+          },
+          [destination.droppableId]: {
+            ...state.columns[destination.droppableId],
+            boxes: destinationBoxes,
+          },
+        },
+      }))
+
+      updateDoc(get().boardDocRef(["columns", source.droppableId]), {
+        boxes: sourceBoxes,
+      })
+      updateDoc(get().boardDocRef(["columns", destination.droppableId]), {
+        boxes: destinationBoxes,
+      })
+    }
+    // console.timeEnd()
   },
 }))
 
