@@ -19,6 +19,7 @@ const board = () => {
     if (router.isReady) {
       board.initializeBoard(uid as string, id as string, user?.uid || "")
     }
+    return () => board.setStatus(0)
   }, [router])
 
   useEffect(() => {

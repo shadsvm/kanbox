@@ -13,7 +13,7 @@ const SearchBar = ({search, setSearch}: {search: string, setSearch: (text:string
         maxLength={10}
       ></input>
       <Link href="/board/create">
-        <button className="px-4 py-2 whitespace-nowrap rounded bg-gray-300 text-black">
+        <button className="px-4 py-2 whitespace-nowrap rounded bg-gray-300 trans hover:bg-white text-black">
           Add new...
         </button>
       </Link>

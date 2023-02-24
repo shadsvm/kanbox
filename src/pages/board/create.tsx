@@ -30,8 +30,8 @@ const Create = () => {
   return (
     <Layout>
       <ProtectedRoute>
-        <main className="mx-auto flex max-w-xs flex-1 flex-col items-center justify-center gap-5 sm:max-w-xl md:max-w-2xl">
-          <h1 className="text-2xl font-semibold sm:text-4xl">Let's create new board</h1>
+        <main className="mx-auto flex max-w-xs flex-1 flex-col items-center justify-center gap-7 sm:max-w-xl md:max-w-2xl">
+          <h1 className=" text-2xl font-semibold sm:text-4xl">Let's create new board</h1>
           <form onSubmit={submit} className="flex w-full max-w-xl flex-col gap-3">
             <input
               type="text"
@@ -51,9 +51,7 @@ const Create = () => {
               onChange={(e) => updateForm({ description: e.target.value })}
             />
 
-            <p className={`my-3 text-center text-xs text-gray-400 sm:text-base ${form.public ? "opacity-100" : "opacity-0"}`}>Everyone with a link will be able to read and write</p>
-
-            <div className=" flex w-full items-center justify-between gap-5">
+            <div className="mt-4 flex w-full items-center justify-between gap-5">
               <button type="button" onClick={() => updateForm({ public: !form.public })} className="flex items-center gap-2 text-lg">
                 <i className={`bi bi-${form.public ? "unlock" : "lock"}`} />
                 {form.public ? "Public" : "Only me"}
@@ -68,6 +66,7 @@ const Create = () => {
                 </button>
               </div>
             </div>
+            <p className={`trans my-3 text-center text-xs text-gray-400 sm:text-base ${form.public ? "opacity-100" : "opacity-0"}`}>Everyone with a link will be able to read and write</p>
           </form>
         </main>
       </ProtectedRoute>

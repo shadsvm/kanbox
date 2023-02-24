@@ -13,11 +13,14 @@ body {
 
 * {
   box-sizing: border-box;
-  @apply transition duration-300;
 }
 
 input:focus {
   outline: none !important;
+}
+
+.trans {
+  @apply transition duration-200;
 }
 
 .btn {

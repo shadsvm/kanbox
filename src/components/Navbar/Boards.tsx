@@ -15,15 +15,15 @@ const Navbar = () => {
   if (board)
     return (
       <div className="w-full bg-black">
-        <nav className="container mx-auto flex items-center justify-between p-5 text-lg ">
-          <section className="flex items-center gap-8">
+        <nav className="container mx-auto flex  items-center justify-between  p-2 py-5 text-lg sm:p-5 ">
+          <section className="flex  items-center gap-4  sm:gap-8">
             {user && (
               <Link href={"/board"}>
                 <button className="bi bi-chevron-left" />
               </Link>
             )}
-            <h1 className="text-2xl font-medium">{board?.name}</h1>
-            <div className="flex gap-1 rounded-full bg-primary-500 px-4 py-1 text-sm">
+            <h1 className="  truncate text-2xl font-medium">{board?.name}</h1>
+            <div className="hidden gap-1 rounded-full bg-primary-500 px-4 py-1 text-sm sm:flex">
               <i className={`bi bi-${board.public ? "unlock" : "lock"}`} />
               {board.public ? "Public" : "Private"}
             </div>

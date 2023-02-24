@@ -22,6 +22,7 @@ interface Store {
   boardCollectionRef: (pathSegments?: string[]) => Query<DocumentData>
 
   updateBuilder: (payload: any) => void
+  setStatus: (payload: number) => void
 
   addBox: (column: string) => void
   editBox: (id: string, name: string) => void
@@ -56,6 +57,7 @@ const useBoardStore = create<Store>((set, get) => ({
   boardCollectionRef: (pathSegments?: string[]) => collection(database, get().path, ...(pathSegments?.length ? pathSegments : [])),
 
   updateBuilder: (payload: any) => set((state) => ({ builder: { ...state.builder, ...payload } })),
+  setStatus: (payload: number) => set({ status: payload }),
 
   addBox: (column: string) => {
     if (!get().builder[column].value) return

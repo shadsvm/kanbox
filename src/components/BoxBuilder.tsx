@@ -5,8 +5,8 @@ const BoxBuilder = ({ columnID }: { columnID: string }) => {
 
   if (!board.builder[columnID].state)
     return (
-      <button onClick={() => board.updateBuilder({ [columnID]: { state: true } })} className="flex w-full items-center justify-start gap-1 text-gray-400  hover:text-gray-100">
-        <p className="bi bi-plus-lg ml-2">Add a box</p>
+      <button onClick={() => board.updateBuilder({ [columnID]: { state: true } })} className="trans flex w-full items-center justify-start gap-1 text-gray-400 hover:text-gray-100">
+        <p className="bi bi-plus-lg ml-2 flex items-center gap-2">Add a box</p>
       </button>
     )
   else
