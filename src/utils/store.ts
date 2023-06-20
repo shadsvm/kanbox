@@ -59,11 +59,13 @@ const useBoardStore = create<Store>((set, get) => ({
   updateBuilder: (payload: any) => set((state) => ({ builder: { ...state.builder, ...payload } })),
   setStatus: (payload: number) => set({ status: payload }),
 
-  addBox: (column: string) => {
+  addBox: async (column: string) => {
     if (!get().builder[column].value) return
     const id = uuid()
     const box = { [id]: { name: get().builder[column].value } }
     const columnBoxes = [...get().columns[column].boxes, id]
+
+    get().updateBuilder({ [column]: { state: false, value: "" } })
 
     set({ boxes: { ...get().boxes, ...box } })
     set({
@@ -72,14 +74,14 @@ const useBoardStore = create<Store>((set, get) => ({
         [column]: { ...get().columns[column], boxes: columnBoxes },
       },
     })
-    updateDoc(get().boardDocRef(["columns", column]), { boxes: columnBoxes })
-    setDoc(get().boardDocRef(["boxes", id]), box[id])
-    get().updateBuilder({ [column]: { state: false, value: "" } })
+
+    await updateDoc(get().boardDocRef(["columns", column]), { boxes: columnBoxes })
+    await setDoc(get().boardDocRef(["boxes", id]), box[id])
   },
 
-  editBox: (id: string, name: string) => {
+  editBox: async (id: string, name: string) => {
     set({ boxes: { ...get().boxes, [id]: { ...get().boxes[id], name: name } } })
-    updateDoc(get().boardDocRef(["boxes", id]), { name: name })
+    await updateDoc(get().boardDocRef(["boxes", id]), { name: name })
   },
 
   deleteBox: async (columnID: string, boxID: string) => {
@@ -97,6 +99,7 @@ const useBoardStore = create<Store>((set, get) => ({
       },
     }))
   },
+
   deleteAllColumnBoxes: async (columnID: string) => {
     const boxes = get().boxes
     const columnBoxes = get().columns[columnID].boxes
@@ -174,7 +177,7 @@ const useBoardStore = create<Store>((set, get) => ({
     get().fetchColumns()
   },
 
-  DragAndDrop: (result: DropResult) => {
+  DragAndDrop: async (result: DropResult) => {
     // console.log("%cEvent: Drag and Drop", "color: yellow", result)
     // console.time()
 
@@ -195,7 +198,7 @@ const useBoardStore = create<Store>((set, get) => ({
         },
       }))
 
-      updateDoc(get().boardDocRef(["columns", source.droppableId]), {
+      await updateDoc(get().boardDocRef(["columns", source.droppableId]), {
         boxes: sourceBoxes,
       })
     } else {
@@ -218,10 +221,10 @@ const useBoardStore = create<Store>((set, get) => ({
         },
       }))
 
-      updateDoc(get().boardDocRef(["columns", source.droppableId]), {
+      await updateDoc(get().boardDocRef(["columns", source.droppableId]), {
         boxes: sourceBoxes,
       })
-      updateDoc(get().boardDocRef(["columns", destination.droppableId]), {
+      await updateDoc(get().boardDocRef(["columns", destination.droppableId]), {
         boxes: destinationBoxes,
       })
     }
